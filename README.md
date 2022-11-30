@@ -16,6 +16,16 @@ Features included in this library:
   When you `get`, `batchGet` or `query`, the result types are automatically inferred. And when you apply filters on your
   `query` the attribute names are automatically type-checked.
 
+## Local Development
+To test out dev changes here in the consuming package, run:
+> npm run build
+> npm pack
+
+Then copy the tgz produced into the root of the consuming project and refer to it from the package/json of consuming package as:
+> "dynamo-builder": "file:dynamo-builder-1.0.0.tgz",
+
+remember to run install in consuming package too.
+
 ## Usage
 
 ### 1. Install
