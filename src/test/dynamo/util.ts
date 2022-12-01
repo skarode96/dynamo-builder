@@ -1,7 +1,8 @@
-import { DynamoDB } from "aws-sdk"
+import {DynamoDB} from "aws-sdk"
 import crypto from "crypto"
-import { Beyonce } from "../../main/dynamo/Beyonce"
-import { Song, SongModel, table } from "./models"
+import {Beyonce, Table} from "../../main"
+import {Song, SongModel, table} from "./models"
+import {Author, LibraryTable, ModelType} from "./LibraryModels"
 
 export const port = 8000
 const isRunningOnCI = process.env.CI_BUILD_ID !== undefined
@@ -9,20 +10,24 @@ const isRunningOnCI = process.env.CI_BUILD_ID !== undefined
 // see https://documentation.codeship.com/pro/builds-and-configuration/services/#container-networking
 const endpoint = isRunningOnCI ? `http://dynamodb:${port}` : `http://localhost:${port}`
 
+const deleteAllTables = async (client: DynamoDB) => {
+  const { TableNames: tables } = await client.listTables().promise();
+  for (const t of [table, LibraryTable]) {
+    if (tables !== undefined && tables.indexOf(t.tableName) !== -1) {
+      await client.deleteTable({TableName: t.tableName}).promise();
+    }
+  }
+};
+
 export async function setup(): Promise<Beyonce> {
   const { tableName } = table
-  const client = createDynamoDB()
+  const client = createDynamoDB();
 
-  // DynamoDB Local runs as an external http server, so we need to clear
-  // the table from previous test runs
-  const { TableNames: tables } = await client.listTables().promise()
-  if (tables !== undefined && tables.indexOf(tableName) !== -1) {
-    await client.deleteTable({ TableName: tableName }).promise()
-  }
+  await deleteAllTables(client);
+  const request = table.asCreateTableInput("PAY_PER_REQUEST");
+  await client.createTable(request).promise()
 
-  await client.createTable(table.asCreateTableInput("PAY_PER_REQUEST")).promise()
-
-  return createBeyonce(client)
+  return createBeyonce(client, table)
 }
 
 export function createDynamoDB(): DynamoDB {
@@ -32,7 +37,7 @@ export function createDynamoDB(): DynamoDB {
   })
 }
 
-export function createBeyonce(db: DynamoDB): Beyonce {
+export function createBeyonce(db: DynamoDB, table: Table): Beyonce {
   return new Beyonce(table, db)
 }
 
@@ -58,4 +63,41 @@ export async function create25Songs(db: Beyonce): Promise<Song[]> {
     db.batchWriteWithTransaction({ putItems: songs.slice(15) })
   ])
   return songs
+}
+
+export async function libraryTableSetup(): Promise<Beyonce> {
+  const { tableName } = LibraryTable;
+  const client = createDynamoDB();
+
+  await deleteAllTables(client);
+
+  await client.createTable({
+    TableName: tableName,
+
+    KeySchema: [
+      { AttributeName: "pk", KeyType: "HASH" },
+      { AttributeName: "sk", KeyType: "RANGE" }
+    ],
+
+    AttributeDefinitions: [
+      {
+        AttributeName: "pk",
+        AttributeType: "N"
+      },
+      {
+        AttributeName: "sk",
+        AttributeType: "S"
+      }
+    ],
+
+    BillingMode: "PAY_PER_REQUEST"
+  }).promise();
+
+  const db = createBeyonce(client, LibraryTable);
+  await db.put<Author>({
+    pk: 123,
+    sk: "Terry Pratchett",
+    model: ModelType.Author
+  });
+  return db;
 }

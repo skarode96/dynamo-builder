@@ -1,13 +1,13 @@
 import { TaggedModel } from "./types"
 
 export class PartitionKey<T extends TaggedModel> {
-  constructor(readonly partitionKeyName: string, readonly partitionKey: string, readonly modelTags: T["model"][]) {}
+  constructor(readonly partitionKeyName: string, readonly partitionKey: string | number, readonly modelTags: T["model"][]) {}
 }
 
 export class PartitionKeyAndSortKeyPrefix<T extends TaggedModel> {
   constructor(
     readonly partitionKeyName: string,
-    readonly partitionKey: string,
+    readonly partitionKey: string | number,
     readonly sortKeyName: string,
     readonly sortKeyPrefix: string,
     readonly modelTag: T["model"]
@@ -17,9 +17,9 @@ export class PartitionKeyAndSortKeyPrefix<T extends TaggedModel> {
 export class PartitionAndSortKey<T extends TaggedModel> {
   constructor(
     readonly partitionKeyName: string,
-    readonly partitionKey: string,
+    readonly partitionKey: string | number,
     readonly sortKeyName: string,
-    readonly sortKey: string,
+    readonly sortKey: string | number,
     readonly modelTag: T["model"]
   ) {}
 

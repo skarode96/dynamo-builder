@@ -12,7 +12,9 @@ import {
   SongModel,
   table
 } from "./models"
-import { setup } from "./util"
+import {libraryTableSetup, setup} from "./util"
+import {AuthorModel, AuthorsPartition, ModelType as AuthorModels} from "./LibraryModels";
+import {PartitionAndSortKey, PartitionKey, PartitionKeyAndSortKeyPrefix} from "../../main/dynamo/keys";
 
 describe("Beyonce", () => {
   // Without encryption
@@ -228,6 +230,47 @@ describe("Beyonce", () => {
   it("should write multiple items at once ", async () => {
     await testBatchWrite()
   })
+
+  it("Partition and sort keys work with non-string values", async () => {
+    const beyonce = await libraryTableSetup();
+    const results = await beyonce.query(
+        new PartitionKey("pk", 123, [AuthorModels.Author])
+    ).exec();
+
+    expect(results).toEqual({
+      Author: [
+        {
+          pk: 123,
+          sk: "Terry Pratchett",
+          model: "Author"
+        }
+      ]
+    });
+
+    const withSortKeyPrefixResults = await beyonce.query(
+        new PartitionKeyAndSortKeyPrefix("pk", 123, "sk", "Terry", "Author")
+    ).exec();
+
+    expect(withSortKeyPrefixResults).toEqual({
+      Author: [
+        {
+          model: "Author",
+          pk: 123,
+          sk: "Terry Pratchett"
+        }
+      ]
+    });
+
+    const partitionKeyAndSortKeyResult = await beyonce.get(
+        new PartitionAndSortKey("pk", 123, "sk", "Terry Pratchett", AuthorModels.Author)
+    );
+
+    expect(partitionKeyAndSortKeyResult).toEqual({
+        model: "Author",
+        pk: 123,
+        sk: "Terry Pratchett"
+    });
+  });
 })
 
 async function testPutAndRetrieveItem() {
