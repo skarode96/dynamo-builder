@@ -49,9 +49,9 @@ export async function batchGetItems<T extends PartitionAndSortKey<TaggedModel>>(
 function mapToKeysAndRemoveDuplicate<T extends PartitionAndSortKey<TaggedModel>>(
   keys: T[],
   table: Table
-): Array<Record<string, string>> {
+): Array<Record<string, string | number>> {
   const dynamoKeyMap: Record<string, boolean> = {}
-  const uniqueKeys: Array<Record<string, string>> = []
+  const uniqueKeys: Array<Record<string, string | number>> = []
   const { partitionKeyName, sortKeyName } = table
   keys.forEach(({ partitionKey, sortKey }) => {
     if (!dynamoKeyMap[`${partitionKey}-${sortKey}`]) {
