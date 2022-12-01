@@ -7,7 +7,13 @@
   "bin": {
     "beyonce": "dist/codegen/cli.js"
   },
-  "keywords": ["dynamodb", "query", "builder", "typesafe", "dynamodb-ts"],
+  "keywords": [
+    "dynamodb",
+    "query",
+    "builder",
+    "typesafe",
+    "dynamodb-ts"
+  ],
   "files": [
     "./dist",
     "./src"
