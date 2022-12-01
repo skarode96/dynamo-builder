@@ -24,7 +24,7 @@ To test out dev changes here in the consuming package, run:
 Then copy the tgz produced into the root of the consuming project and refer to it from the package/json of consuming package as:
 > "dynamo-builder": "file:dynamo-builder-1.0.0.tgz",
 
-remember to run install in consuming package too.
+NOTE: remember to run install in consuming package too.
 
 ## Usage
 
