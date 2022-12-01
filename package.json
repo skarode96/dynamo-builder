@@ -51,7 +51,8 @@
   "scripts": {
     "build": "tsc",
     "prepare": "npm run build",
-    "test": "jest --runInBand"
+    "test": "jest --runInBand",
+    "postinstall": "husky install"
   },
   "author": "Sameer Karode",
   "license": "Apache 2.0"
