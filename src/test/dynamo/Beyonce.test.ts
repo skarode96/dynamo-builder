@@ -13,7 +13,7 @@ import {
   table
 } from "./models"
 import {libraryTableSetup, setup} from "./util"
-import {AuthorModel, AuthorsPartition, ModelType as AuthorModels} from "./LibraryModels";
+import {ModelType as AuthorModels} from "./LibraryModels";
 import {PartitionAndSortKey, PartitionKey, PartitionKeyAndSortKeyPrefix} from "../../main/dynamo/keys";
 
 describe("Beyonce", () => {
